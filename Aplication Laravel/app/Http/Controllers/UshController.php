@@ -16,7 +16,13 @@ class UshController extends Controller
 {
     public $userdata;
 
-    function logout() {
+    public function dump($data) {
+        echo '<div class="alert alert-danger" role="alert">';
+        print_r($data);
+        echo "</div>";
+    }
+
+    public function logout() {
         session()->flush();
         return redirect()->route('login');
     }
@@ -31,13 +37,11 @@ class UshController extends Controller
                 if (!$user) {
                     $idsession = session('user_id');
                     $newUser = User::where('id', $idsession)->first();
-
                     if ($newUser) {
                         return redirect()->route('Goals');
                     }
                 }
-
-                if ($user && Hash::check($password, $user->password)) {
+                elseif (Hash::check($password, $user->password)) {
                     $request->session()->put('user_id', $user->id);
                     $request->session()->put('user_email', $user->email);
                     $request->session()->put('user_name', $user->name);
@@ -45,11 +49,13 @@ class UshController extends Controller
                     $request->session()->put('user_pp', $user->profilepaat);
                     return redirect()->route('home');
                 } else {
-                    return redirect()->back()->with('error', 'Invalid email or password');
+                    $this->dump("Tertapat Kesalah Proses");
+                    // return redirect()->back()->with('error', 'Invalid email or password');
                 }
             }
         } catch (\Exception $e) {
-            return redirect()->back()->with('error', 'Failed to process the request');
+            $this->dump("Tertapat Kesalah Proses");
+            // return redirect()->back()->with('error', 'Failed to process the request');
         }
 
         return view('login');
@@ -81,7 +87,8 @@ class UshController extends Controller
                 return redirect()->route('login');
             }
         } catch (\Exception $e) {
-            // dump($e->getMessage());
+            $this->dump("Tertapat Kesalah Proses");
+            // $this->dump($e->getMessage());
         }
 
         return view('Componen.Signup');
@@ -123,8 +130,6 @@ class UshController extends Controller
             $gelas = 0;
         }
 
-        // dd($gelas)
-
         $data = [
             'user_id' => $request->session()->get('user_id'),
             'user_email' => $request->session()->get('user_email'),
@@ -140,7 +145,7 @@ class UshController extends Controller
                 "sum" => $results
             ],
         ];
-        // dd($data);
+
         return view('home', $data);
     }
 
@@ -180,6 +185,7 @@ class UshController extends Controller
 
             return view('Componen.personal', $data);
         } catch (\Exception $e) {
+            $this->dump("Tertapat Kesalah Proses");
             return $e->getMessage();
         }
     }
@@ -224,7 +230,7 @@ class UshController extends Controller
 
             return redirect()->route('home');
         } catch (\Exception $e) {
-            // dump($e->getMessage());
+            $this->dump("Tertapat Kesalah Proses");
         }
 
         return view('Componen.Goals');

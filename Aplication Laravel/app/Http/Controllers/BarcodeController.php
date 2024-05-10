@@ -38,22 +38,15 @@ class BarcodeController extends Controller
     }
 
     function Newfood(Request $request) {
-        // dd()
-        // $lasteat = DB::table('Konsumsi')->where('ushid', session('user_id'))->latest()->first();
         try{
             if ($request->pat){
                 $dapa=[];
-                // cek if file is uploaded
                 if ($request->hasFile('pati')||$request->hasFile('pato')) {
                     $dapa=$this->barcode($request);
-
-                    // dd($dapa);
                     return view($dapa[0],$dapa[1]);
                 }else{
                     $dapa[0] = "mvp.Barcode";
                 }
-
-                // dd($dapa);
                 return view($dapa[0]);
             }else{
                 $newfood = DB::table('Konsumsi')->get();
@@ -81,10 +74,14 @@ class BarcodeController extends Controller
                 return view('Componen.InputMeals',$data);
             }
         }catch(\Exception $e){
-            // dd($e->getMessage());
+            $this->dump("Terjadi kesalahan");
         }
     }
-
+    public function dump($text){
+        echo '<div class="alert alert-danger" role="alert">';
+        print_r($text);
+        echo "</div>";
+    }
 
     public function barcode(Request $request)
     {
@@ -92,10 +89,8 @@ class BarcodeController extends Controller
         $trackpase=[];
         $lasteat=[];
         try {
-            // dump($request->allFiles());
             $data = [];
             if ($request->file('pati')) {
-                // dd($request->all());
                 $request->validate([
                     'pati' => 'required|image|mimes:jpeg,png,jpg,gif,svg|max:10048',
                 ]);
@@ -105,8 +100,7 @@ class BarcodeController extends Controller
                 $pati->move(public_path('images'), $patiFileName);
                 $patiPath = public_path('images') . '/' . $patiFileName;
                 $response = Http::get('http://localhost:5000/fokuspoin?imgpat=' . $patiPath);
-                // $barcode = $response->json();
-                $barcode = "b'8991002122000'";
+                $barcode = $response->json();
                 $defied = DB::table('dfoods')->where('barcode', 'like', $barcode . '%')->first();
                 $trackpase = Trackpase::create([
                     'barcode' => $barcode,
@@ -121,19 +115,15 @@ class BarcodeController extends Controller
                     "added" => $trackpase,
                     "lasteat" => $lasteat
                 ];
-                // dd($data);
             }
-
-
-            // Penanganan untuk input file 'pato'
             elseif ($request->file('pato')) {
-                // dump("sinar");
                 $request->validate([
                     'pato' => 'required|image|mimes:jpeg,png,jpg,gif,svg|max:10048',
                 ]);
-
                 $pato = $request->file('pato');
-                $sup=$this->poinrequest("https://thumb.viva.id/intipseleb/1265x711/2022/10/21/6352aa183c0c1-resep-ayam-goreng-kalasan.jpg");
+                $pato->move(public_path('images'), time() . '.' . $pato->getClientOriginalExtension());
+                $pathfileurl = 'images' . '/' . time() . '.' . $pato->getClientOriginalExtension();
+                $sup=$this->poinrequest(url($pathfileurl));
                 $lasteat=DB::table('Konsumsi')->where('ushid', session('user_id'))->latest()->first();
                 $lasteat->kcal=$sup["calories"];
                 $lasteat->fat=$sup["fat"];
@@ -146,27 +136,19 @@ class BarcodeController extends Controller
                     "added" => $trackpase,
                     "lasteat" => $lasteat
                 ];
-                // $data=$sup;
-                // dd($data);
-
             }
 
-            // Jika tidak ada input file yang diunggah, kembalikan pesan error
             if (!($request->hasFile('pati')||$request->hasFile('pato'))) {
+                $this->dump('No file uploaded.');
                 throw new \Exception('No file uploaded.');
             }
-            // dd();
-
-            // dd($data);
-
             return ["Componen.Meal_info",$data];
 
         } catch (\Exception $e) {
-            dd('error msg: ' . $e->getMessage());
-            // return response()->json(['error' => 'Failed to process the request: ' . $e->getMessage()], 500);
+            $this->dump("terjadi kesalahan");
         }
 
-        // return response()->json(['data' => $data], 200);
+        return redirect()->route('home');
     }
 
 }

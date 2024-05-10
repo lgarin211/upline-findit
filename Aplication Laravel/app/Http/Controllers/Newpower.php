@@ -14,14 +14,6 @@ use Illuminate\Support\Facades\Http;
 class Newpower extends Controller
 {
 
-    // template
-    // public function customer(Request $request) {
-    //     $data = ["user"=>DB::table('Member')->where('id', session('user_id'))->first()];
-    //     return view('Componen.Signup',$data);
-    // }
-
-
-
     public function profile(Request $request) {
             $user =DB::table('Member')->where('id', session('user_id'))->first();
             $weightRecord = DB::table('TrakingRecord')->where('ushid', session('user_id'))->first();
@@ -42,19 +34,7 @@ class Newpower extends Controller
                 "goals"=>$goals,
                 "usia"=>$usia?$usia:"0"
             ];
-
-            // dd($user->name);
             return view('Componen.Profile',$data);
-
-
-            // case untuk handle dengan ternary
-            // dd($user->name)
-            // intinya  -> itu untuk spesifik kita mau nunjuknya itu apa
-            // kita kasih kondisi kondisi tertentu dengan ternary
-            // dd($user?"$user->name":"kosong")
-            // jadi intinya adalah ketika usernya isi maka nanti akan ditampilkan namanya
-            // tetapi ketika tidak ada isinya maka nanti akan ditampilkan "kosong"
-
     }
 
     //Function untuk menghitung BMI

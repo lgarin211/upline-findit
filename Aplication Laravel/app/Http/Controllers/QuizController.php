@@ -54,31 +54,25 @@ class QuizController extends Controller{
 
         return view('Componen.StressMeter', compact('questions'));
     }
+    public function dump($data) {
+        echo '<div class="alert alert-danger" role="alert">';
+        print_r($data);
+        echo "</div>";
+    }
 
     public function submitQuiz(Request $request)
     {
-        // Validasi input dari form quiz jika diperlukan
-        $validatedData = $request->validate([
-            // Tentukan aturan validasi sesuai dengan kebutuhan
-        ]);
+        $validatedData = $request->validate([]);
 
         try {
-            // Simpan hasil quiz ke dalam database atau lakukan operasi lainnya sesuai kebutuhan
-            // Di sini Anda bisa mengakses dan menyimpan jawaban yang di-submit oleh pengguna
-            // Contoh:
             $difficultToSleep = $request->input('difficult_to_sleep');
             $anxiousOrWorried = $request->input('anxious_or_worried');
             $tiredOrExhausted = $request->input('tired_or_exhausted');
             $confusedOrLost = $request->input('confused_or_lost');
             $findDifficult = $request->input('confused_or_lost');
-            // Lakukan hal yang sama untuk setiap pertanyaan lainnya
-
-            // Setelah mendapatkan jawaban, Anda bisa menyimpannya ke dalam database atau melakukan operasi lainnya
-            // Misalnya, simpan ke dalam tabel 'StressMeterResults'
-
+            $this->dump("Quiz submitted successfully.");
             return redirect()->back()->with('success', 'Quiz submitted successfully.');
         } catch (\Exception $e) {
-            // Jika terjadi kesalahan, tampilkan pesan kesalahan dan kembalikan ke halaman sebelumnya
             return redirect()->back()->with('error', 'Failed to submit quiz. Please try again.');
         }
     }
